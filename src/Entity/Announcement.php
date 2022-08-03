@@ -26,6 +26,7 @@ use Drupal\user\EntityOwnerTrait;
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\announcement\AnnouncementListBuilder",
+ *     "access" = "Drupal\announcement\AnnouncementAccessControlHandler",
  *     "form" = {
  *       "default" = "Drupal\announcement\Form\AnnouncementForm",
  *       "add" = "Drupal\announcement\Form\AnnouncementForm",
@@ -63,14 +64,14 @@ use Drupal\user\EntityOwnerTrait;
  *   },
  *   field_ui_base_route = "entity.announcement.admin_form",
  *   links = {
- *     "add-page" = "/announcement/add",
- *     "add-form" = "/announcement/add",
- *     "canonical" = "/announcement/{announcement}/edit",
+ *     "add-page" = "/admin/content/announcement/add",
+ *     "add-form" = "/admin/content/announcement/add",
+ *     "canonical" = "/admin/content/announcement/{announcement}/edit",
  *     "collection" = "/admin/content/announcement",
- *     "delete-form" = "/announcement/{announcement}/delete",
- *     "delete-multiple-form" = "/announcement/delete",
- *     "edit-form" = "/announcement/{announcement}/edit",
- *     "revision" = "/announcement/{announcement}/revisions/{announcement_revision}/view",
+ *     "delete-form" = "/admin/content/announcement/{announcement}/delete",
+ *     "delete-multiple-form" = "/admin/content/announcement/delete",
+ *     "edit-form" = "/admin/content/announcement/{announcement}/edit",
+ *     "revision" = "/admin/content/announcement/{announcement}/revisions/{announcement_revision}/view",
  *   }
  * )
  */

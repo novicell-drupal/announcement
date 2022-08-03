@@ -1,0 +1,32 @@
+administer announcement:
+  title: 'Administer announcement'
+  restrict access: TRUE
+
+view announcement:
+  title: 'View announcement'
+
+update own announcement:
+  title: 'Update own announcement'
+
+update any announcement:
+  title: 'Update any announcement'
+
+delete own announcement:
+  title:  'Delete own announcement'
+
+delete any announcement:
+  title:  'Delete any announcement'
+
+create own announcement:
+  title: 'Create announcement'
+
+view all announcement revisions:
+  title: 'View all announcement revisions'
+  description: 'To view a revision, you also need permission to view the announcement item.'
+
+access announcement overview:
+  title: 'Access announcement overview'
+  description: 'Users with this permission can access the announcement overview page.'
+
+view own unpublished announcement:
+  title: 'View own unpublished announcement'

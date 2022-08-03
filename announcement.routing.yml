@@ -1,19 +1,10 @@
-
-announcement.admin_index:
-  path: '/admin/config/content/announcement'
-  defaults:
-    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
-    _title: 'Announcements'
-  requirements:
-    _permission: 'access administration pages'
-
 entity.announcement.collection:
-  path: '/admin/announcement'
+  path: '/admin/content/announcement'
   defaults:
     _entity_list: 'announcement'
     _title: 'Announcements'
   requirements:
-    _permission: 'administer announcement'
+    _permission: 'access announcement overview'
 
 entity.announcement.admin_form:
   path: '/admin/config/content/announcement/settings'
@@ -21,10 +12,10 @@ entity.announcement.admin_form:
     _form: '\Drupal\announcement\Form\AnnouncementSettingsForm'
     _title: 'Announcement settings'
   requirements:
-    _permission: 'administer announcement settings'
+    _permission: 'administer announcement'
 
 announcement.admin_create:
-  path: '/admin/announcement/create'
+  path: '/admin/content/announcement/add'
   defaults:
     _entity_form: 'announcement.add'
     _title: 'Add announcement'

@@ -3,7 +3,12 @@ description: Can be used for breaking news or similar alerts.
 type: module
 core_version_requirement: ^8 || ^9
 version: '1.0'
+configure: entity.announcement.admin_form
 package: Content
+
+dependencies:
+  - core:datetime
+  - core:text
 
 interface translation project: announcement
 interface translation server pattern: modules/contrib/announcement/translations/%language.po

@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.announcement.body
+  module:
+    - allowed_formats
+    - announcement
+    - text
+third_party_settings:
+  allowed_formats:
+    allowed_formats: {  }
+id: announcement.announcement.body
+field_name: body
+entity_type: announcement
+bundle: announcement
+label: Body
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long

@@ -1,0 +1,121 @@
+<?php
+
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Render\Element;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\language\ConfigurableLanguageInterface;
+use Drupal\user\UserInterface;
+
+/**
+ * Implements hook_locale_translation_projects_alter().
+ */
+function announcement_locale_translation_projects_alter(&$projects) {
+  $module_handler = \Drupal::service('module_handler');
+  $path = $module_handler->getModule('announcement')->getPath();
+  $projects['announcement']['info']['interface translation server pattern'] = $path . '/translations/%language.po';
+}
+
+/**
+ * Implements hook_theme().
+ */
+function announcement_theme($existing, $type, $theme, $path) {
+  return [
+    'announcement' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for announcement templates.
+ *
+ * Default template: announcement.html.twig.
+ *
+ * Most themes use their own copy of announcement.html.twig. The default is located
+ * inside "/core/modules/announcement/templates/announcement.html.twig". Look in there for the
+ * full list of variables.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - announcement: The announcement object.
+ *
+ * @see \Drupal\Core\Field\BaseFieldDefinition::setDisplayConfigurable()
+ */
+function template_preprocess_announcement(&$variables) {
+  $variables['announcement'] = $variables['elements']['#announcement'];
+  /** @var \Drupal\announcement\AnnouncementInterface $announcement */
+  $announcement = $variables['announcement'];
+
+  $variables['date'] = \Drupal::service('renderer')->render($variables['elements']['created']);
+  unset($variables['elements']['created']);
+  unset($variables['elements']['publish_time']);
+  unset($variables['elements']['unpublish_time']);
+  $variables['author_name'] = \Drupal::service('renderer')->render($variables['elements']['uid']);
+  unset($variables['elements']['uid']);
+
+  if (isset($variables['elements']['title']) && (!$announcement->getFieldDefinition('title')->isDisplayConfigurable('view'))) {
+    $variables['label'] = $variables['elements']['title'];
+    unset($variables['elements']['title']);
+  }
+
+  // Helpful $content variable for templates.
+  $variables += ['content' => []];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for 'configurable_language'.
+ */
+function announcement_configurable_language_delete(ConfigurableLanguageInterface $language) {
+  // On announcements with this language, unset the language.
+  \Drupal::entityTypeManager()->getStorage('announcement')->clearRevisionsLanguage($language);
+}
+
+/**
+ * Implements hook_cron().
+ */
+function announcement_cron() {
+  $storage = \Drupal::entityTypeManager()->getStorage('announcement');
+
+  $timezone = date_default_timezone_get();
+  $now = new \DateTime('now', new \DateTimeZone($timezone));
+  $now->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+  $now = DrupalDateTime::createFromDateTime($now);
+
+  // Publish all announcements when scheduled
+  $query = $storage->getQuery();
+  $query
+    ->condition('publish_time', $now->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT), '<');
+  $ids = $query->execute();
+
+  $entities = $storage->loadMultiple($ids);
+  /** @var \Drupal\announcement\AnnouncementInterface $entity */
+  foreach ($entities as $entity) {
+    $entity->setPublished();
+    $entity->set('publish_time', NULL);
+    $entity->save();
+  }
+
+  // Unpublish all announcements when scheduled
+  $query = $storage->getQuery();
+  $query
+    ->condition('status', 1)
+    ->condition('unpublish_time', $now->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT), '<');
+  $ids = $query->execute();
+
+  $entities = $storage->loadMultiple($ids);
+  /** @var \Drupal\announcement\AnnouncementInterface $entity */
+  foreach ($entities as $entity) {
+    $config = \Drupal::config('announcement.settings');
+    if ($config->get('delete_when_deactivated')) {
+      $entity->delete();
+    } else {
+      $entity->setUnpublished();
+      $entity->set('unpublish_time', NULL);
+      $entity->save();
+    }
+  }
+}

@@ -1,0 +1,12 @@
+entity.announcement.collection:
+  title: Announcements
+  route_name: entity.announcement.collection
+  description: 'Manage announcements.'
+  parent: system.admin_content
+  weight: 40
+entity.announcement.admin_form:
+  title: Announcements
+  parent: system.admin_config_content
+  description: 'Configure default announcement settings, including fields.'
+  weight: -10
+  route_name: entity.announcement.admin_form

@@ -1,0 +1,12 @@
+# Schema for the configuration files of the announcement module.
+
+announcement.settings:
+  type: config_object
+  label: 'Announcement settings'
+  mapping:
+    delete_when_deactivated:
+      type: boolean
+      label: 'Delete announcements when they meet the unpublish time'
+    standalone_url:
+      type: boolean
+      label: 'Allow announcement items to be viewed standalone at /announcement/{id}'

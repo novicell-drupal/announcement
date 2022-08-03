@@ -1,29 +1,17 @@
-# README #
+# Announcements #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+## Introduction
 
-### What is this repository for? ###
+Announcements is a module made for providing functionality for, well, announcements, but also breaking news or alerts or similar. Any kind of site wide notification.
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+## Installation
 
-### How do I get set up? ###
+When installed the module is mostly ready to use except for the placement of the announcement block that needs to be inserted into an appropiate region where it's alwaus visible.
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+## Fields
 
-### Contribution guidelines ###
+Announcements are fully fieldable, so if a project needs more fancy fields than just an RTE field, you can delete the body field and / or add more fields.
 
-* Writing tests
-* Code review
-* Other guidelines
+## Theming
 
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+In order to give the announcements some styling all you need to do is to provide template called announcement.html.twig in the theme and add a library with CSS.

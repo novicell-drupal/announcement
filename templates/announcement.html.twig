@@ -1,0 +1,55 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a announcement.
+ *
+ * Available variables:
+ * - announcement: The announcement entity with limited access to object properties and methods.
+ *   Only method names starting with "get", "has", or "is" and a few common
+ *   methods such as "id", "label", and "bundle" are available. For example:
+ *   - announcement.getCreatedTime() will return the announcement creation timestamp.
+ *   - announcement.hasField('field_example') returns TRUE if the announcement bundle includes
+ *     field_example. (This does not indicate the presence of a value in this
+ *     field.)
+ *   - announcement.isPublished() will return whether the announcement is published or not.
+ *   Calling other methods, such as announcement.delete(), will result in an exception.
+ *   See \Drupal\announcement\Entity\announcement for a full list of public properties and
+ *   methods for the announcement object.
+ * - label: (optional) The title of the announcement.
+ * - content: All announcement items. Use {{ content }} to print them all,
+ *   or print a subset such as {{ content.field_example }}. Use
+ *   {{ content|without('field_example') }} to temporarily suppress the printing
+ *   of a given child element.
+ * - attributes: HTML attributes for the containing element.
+ *   The attributes.class element may contain one or more of the following
+ *   classes:
+ *   - announcement: The current template type (also known as a "theming hook").
+ * - title_attributes: Same as attributes, except applied to the main title
+ *   tag that appears in the template.
+ * - content_attributes: Same as attributes, except applied to the main
+ *   content tag that appears in the template.
+ * - title_prefix: Additional output populated by modules, intended to be
+ *   displayed in front of the main title tag that appears in the template.
+ * - title_suffix: Additional output populated by modules, intended to be
+ *   displayed after the main title tag that appears in the template.
+ *
+ * @see template_preprocess_announcement()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes }}>
+
+  {{ title_prefix }}
+  {% if label %}
+    <h2{{ title_attributes }}>
+      <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+    </h2>
+  {% endif %}
+  {{ title_suffix }}
+
+  <div{{ content_attributes }}>
+    {{ content }}
+  </div>
+
+</div>

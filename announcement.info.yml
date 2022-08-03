@@ -1,0 +1,9 @@
+name: Announcements
+description: Can be used for breaking news or similar alerts.
+type: module
+core_version_requirement: ^8 || ^9
+version: '1.0'
+package: Content
+
+interface translation project: announcement
+interface translation server pattern: modules/contrib/announcement/translations/%language.po

@@ -1,0 +1,60 @@
+# Danish translation of Announcements (all releases)
+# Copyright (c) 2022 Novicell
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Announcements (all releases)\n"
+"POT-Creation-Date: 2022-01-25 11:59+0000\n"
+"PO-Revision-Date: 2022-01-25 13:08+0100\n"
+"Language-Team: Danish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"Last-Translator: \n"
+"Language: da\n"
+"X-Generator: Poedit 1.8.11\n"
+
+msgid "Announcement"
+msgstr "Bekendtgørelse"
+
+msgid "Announcements"
+msgstr "Bekendtgørelser"
+
+msgid "announcement"
+msgstr "bekendtgørelse"
+
+msgid "announcements"
+msgstr "bekendtgørelser"
+
+msgid "@count announcement"
+msgid_plural "@count announcements"
+msgstr[0] "@count bekendtgørelse"
+msgstr[1] "@count bekendtgørelser"
+
+msgid "The time that the announcement was created."
+msgstr "Tidspunktet hvor bekendtgørelsen blev oprettet."
+
+msgid "The time that the announcement was last edited."
+msgstr "Tidspunktet hvor bekendtgørelsen blev sidst redigeret."
+
+msgid "Schedule information"
+msgstr "Planlægning"
+
+msgid "Standalone announcement URL"
+msgstr "Enkeltstående bekendtgørelses URL"
+
+msgid "Allow users to access @announcement-entities at /announcement/{id}."
+msgstr "Tilled brugere adgang til @announcement-entities på /announcement/{id}."
+
+msgid "Delete when deactivated"
+msgstr "Slet når deaktiveret"
+
+msgid "Instead of deactivating announcements at the deactivation time, delete them instead."
+msgstr "Istedet for at deaktivere bekendtgørelser ved deaktiveringstidspunktet, slet dem istedet."
+
+msgid "Announcement %label has been created."
+msgstr "Bekendtgørelse %label er blevet oprettet."
+
+msgid "Announcement %label has been updated."
+msgstr "Bekendtgørelse %label er blevet opdateret."

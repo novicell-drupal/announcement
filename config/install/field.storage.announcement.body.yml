@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - announcement
+    - text
+id: announcement.body
+field_name: body
+entity_type: announcement
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

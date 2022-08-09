@@ -32,6 +32,9 @@ msgid_plural "@count announcements"
 msgstr[0] "@count bekendtgørelse"
 msgstr[1] "@count bekendtgørelser"
 
+msgid "Add announcement"
+msgstr "Tilføj bekendtgørelse"
+
 msgid "The time that the announcement was created."
 msgstr "Tidspunktet hvor bekendtgørelsen blev oprettet."
 
@@ -40,6 +43,12 @@ msgstr "Tidspunktet hvor bekendtgørelsen blev sidst redigeret."
 
 msgid "Schedule information"
 msgstr "Planlægning"
+
+msgid "Time to enable"
+msgstr "Tidspunkt at aktivere"
+
+msgid "Time to disable"
+msgstr "Tidspunkt at deaktivere"
 
 msgid "Standalone announcement URL"
 msgstr "Enkeltstående bekendtgørelses URL"

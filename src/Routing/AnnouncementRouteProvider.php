@@ -10,12 +10,12 @@ use Drupal\Core\Entity\Routing\AdminHtmlRouteProvider;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides HTML routes for media pages.
+ * Provides HTML routes for announcement pages.
  */
 class AnnouncementRouteProvider extends AdminHtmlRouteProvider {
 
   /**
-   * The media settings config.
+   * The announcement settings config.
    *
    * @var \Drupal\Core\Config\ImmutableConfig
    */

@@ -6,8 +6,6 @@ use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\TypedData\Exception\MissingDataException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -29,6 +27,13 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
   protected $entityTypeManager;
 
   /**
+   * Cache tags invalidator service.
+   *
+   * @var \Drupal\Core\Cache\CacheTagsInvalidatorInterface
+   */
+  protected $cacheTagsInvalidator;
+
+  /**
    * Constructs a new AnnouncementsBlock object.
    *
    * @param array $configuration
@@ -39,34 +44,62 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
    *   Announcement entity storage class.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Announcement entity view builder class.
+   * @param \Drupal\Core\Cache\CacheTagsInvalidatorInterface $cache_tags_invalidator
+   *   Cache tags invalidator service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, CacheTagsInvalidatorInterface $cache_tags_invalidator) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
+    $this->cacheTagsInvalidator = $cache_tags_invalidator;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_type.manager'));
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_type.manager'), $container->get('cache_tags.invalidator'));
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function build() {
-    $cache_tags_invalidator = \Drupal::service('cache_tags.invalidator');
+/**
+ * {@inheritdoc}
+ */
+public function build() {
+  $build = [];
+  $cache_tags = ['announcement_list'];
 
-    $ids = $this->entityTypeManager->getStorage('announcement')->getQuery()->condition('status', TRUE)->execute();
-    $entities = $this->entityTypeManager->getStorage('announcement')->loadMultiple($ids);
+  // Check if the 'announcement' entity type exists.
+  if ($this->entityTypeManager->hasDefinition('announcement')) {
+    $announcementStorage = $this->entityTypeManager->getStorage('announcement');
 
-    $build['announcements'] = $this->entityTypeManager->getViewBuilder('announcement')->viewMultiple($entities, 'full');
-    foreach ($entities as $entity) {
-      $cache_tags_invalidator->addTags($entity->getCacheTagsToInvalidate());
+    // Query and load the entities only if the entity type exists.
+    $ids = $announcementStorage->getQuery()->condition('status', TRUE)->execute();
+    $entities = $announcementStorage->loadMultiple($ids);
+
+    // Check if entities are found.
+    if (!empty($entities)) {
+      $build['announcements'] = $this->entityTypeManager->getViewBuilder('announcement')->viewMultiple($entities, 'full');
+
+      foreach ($entities as $entity) {
+        $cache_tags = array_merge($cache_tags, $entity->getCacheTags());
+      }
     }
+  }
 
-    return $build;
+  $this->addCacheableDependency($build, $cache_tags);
+
+  return $build;
+}
+
+  /**
+   * Adds cacheable dependency for the block.
+   *
+   * @param array $build
+   *   The render array build.
+   * @param array $cache_tags
+   *   The cache tags array.
+   */
+  protected function addCacheableDependency(array &$build, array $cache_tags) {
+    $build['#cache']['tags'] = CacheTagsInvalidatorInterface::mergeTags($build['#cache']['tags'], $cache_tags);
   }
 
 }

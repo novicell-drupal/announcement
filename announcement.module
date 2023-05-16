@@ -5,6 +5,7 @@ use Drupal\Core\Render\Element;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\language\ConfigurableLanguageInterface;
 use Drupal\user\UserInterface;
+use Drupal\Core\Entity\Query\QueryInterface;
 
 /**
  * Implements hook_locale_translation_projects_alter().
@@ -87,6 +88,7 @@ function announcement_cron() {
 
   // Publish all announcements when scheduled
   $query = $storage->getQuery();
+  $query->accessCheck(FALSE);
   $query
     ->condition('publish_time', $now->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT), '<');
   $ids = $query->execute();
@@ -101,6 +103,7 @@ function announcement_cron() {
 
   // Unpublish all announcements when scheduled
   $query = $storage->getQuery();
+  $query->accessCheck(FALSE);
   $query
     ->condition('status', 1)
     ->condition('unpublish_time', $now->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT), '<');

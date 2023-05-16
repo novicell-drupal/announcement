@@ -2,22 +2,11 @@
 
 namespace Drupal\announcement\Plugin\Block;
 
-use Doctrine\Common\Cache\Cache;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\CacheableMetadata;
-use Drupal\Core\Controller\TitleResolverInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\EntityViewBuilderInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\TypedData\Exception\MissingDataException;
-use Drupal\paragraphs\Entity\Paragraph;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Psr\Container\ContainerInterface;
 
 /**
  * Provides an 'Announcements' block.
@@ -25,57 +14,62 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * @Block(
  *   id = "announcement_block",
  *   admin_label = @Translation("Announcements"),
- *   category= @Translation("Announcements")
+ *   category = @Translation("Announcements")
  * )
  */
 class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * Announcement entity storage class.
+   * The entity storage for announcements.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $storage;
 
   /**
-   * Announcement entity view builder class.
+   * The view builder for announcements.
    *
    * @var \Drupal\Core\Entity\EntityViewBuilderInterface
    */
   protected $viewBuilder;
 
   /**
-   * Constructs a new SystemBreadcrumbBlock object.
+   * Constructs a new AnnouncementsBlock object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
-   *   Announcement entity storage class.
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   *   Announcement entity view builder class.
-   * @var \Drupal\Core\Entity\EntityViewBuilderInterface
+   *   The plugin definition.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityStorageInterface $storage, EntityViewBuilderInterface $viewBuilder) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->storage = $storage;
-    $this->viewBuilder = $viewBuilder;
+    $this->storage = $entity_type_manager->getStorage('announcement');
+    $this->viewBuilder = $entity_type_manager->getViewBuilder('announcement');
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager */
-    $entityTypeManager = $container->get('entity_type.manager');
-    return new static($configuration, $plugin_id, $plugin_definition, $entityTypeManager->getStorage('announcement'), $entityTypeManager->getViewBuilder('announcement'));
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager')
+    );
   }
 
   /**
-   * {@inheritDoc}
+   * Build the content of the block.
+   *
+   * @return array
+   *   A renderable array.
    */
-  public function build(): array {
+  public function build() {
     $cacheMetadata = new CacheableMetadata();
     $cacheMetadata->addCacheTags(['languages', 'announcement_list']);
     $build = [];
@@ -92,5 +86,4 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
 
     return $build;
   }
-
 }

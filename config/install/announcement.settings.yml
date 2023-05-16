@@ -1,2 +1,4 @@
 delete_when_deactivated: 0
 standalone_url: 0
+cache_tags:
+  - 'announcement_list'

@@ -10,3 +10,9 @@ announcement.settings:
     standalone_url:
       type: boolean
       label: 'Allow announcement items to be viewed standalone at /announcement/{id}'
+    cache_tags:
+      type: sequence
+      label: 'Cache tags'
+      sequence:
+        type: string
+        label: 'A cache tag'

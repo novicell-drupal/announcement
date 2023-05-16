@@ -4,6 +4,7 @@ namespace Drupal\announcement\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -54,15 +55,18 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
     $this->configFactory = $config_factory;
   }
 
-  /**
-   * {@inheritdoc}
-   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_type.manager'), $container->get('config.factory'));
   }
 
   /**
-   * {@inheritdoc}
+   * Build the content of the block.
+   *
+   * @return array
+   *   A renderable array.
+   *
+   * @throws \Exception
+   *   Thrown if an invalid cache tag is detected.
    */
   public function build() {
     $build = [];
@@ -72,10 +76,13 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
     $announcementStorage = $this->entityTypeManager->getStorage('announcement');
     $query = $announcementStorage->getQuery();
     $query->condition('status', TRUE);
-    $ids = $query->accessCheck(FALSE)->execute();
+    $ids = $query->execute();
+
+    if (empty($ids)) {
+      return $build;
+    }
 
     $entities = $announcementStorage->loadMultiple($ids);
-
     $build['announcements'] = $this->entityTypeManager->getViewBuilder('announcement')->viewMultiple($entities);
 
     foreach ($entities as $entity) {
@@ -85,23 +92,14 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
           throw new \Exception('Invalid cache tag: ' . var_export($tag, TRUE));
         }
       }
-      $cache_tags = array_merge($cache_tags, $entityCacheTags);
+      $cache_tags = Cache::mergeTags($cache_tags, $entityCacheTags);
     }
 
-    $this->addCacheableDependency($build, $cache_tags);
+    $cacheMetadata = new CacheableMetadata();
+    $cacheMetadata->addCacheTags(['languages', 'announcement_list']);
+
+    $build['#cache']['tags'] = Cache::mergeTags($build['#cache']['tags'] ?? [], $cache_tags, $cacheMetadata->getCacheTags());
 
     return $build;
-  }
-
-  /**
-   * Adds cacheable dependency for the block.
-   *
-   * @param array $build
-   *   The render array build.
-   * @param array $cache_tags
-   *   The cache tags array.
-   */
-  protected function addCacheableDependency(array &$build, array $cache_tags) {
-    $build['#cache']['tags'] = Cache::mergeTags($build['#cache']['tags'] ?? [], $cache_tags);
   }
 }

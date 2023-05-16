@@ -68,9 +68,6 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
    *
    * @return array
    *   A renderable array.
-   *
-   * @throws \Exception
-   *   Thrown if an invalid cache tag is detected.
    */
   public function build() {
     $cacheMetadata = new CacheableMetadata();

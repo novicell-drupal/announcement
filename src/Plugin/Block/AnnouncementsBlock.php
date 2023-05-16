@@ -3,7 +3,7 @@
 namespace Drupal\announcement\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -28,13 +28,6 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
   protected $entityTypeManager;
 
   /**
-   * Cache tags invalidator service.
-   *
-   * @var \Drupal\Core\Cache\CacheTagsInvalidatorInterface
-   */
-  protected $cacheTagsInvalidator;
-
-  /**
    * Configuration factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
@@ -52,15 +45,12 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
    *   Announcement entity storage class.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Announcement entity view builder class.
-   * @param \Drupal\Core\Cache\CacheTagsInvalidatorInterface $cache_tags_invalidator
-   *   Cache tags invalidator service.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   Configuration factory.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, CacheTagsInvalidatorInterface $cache_tags_invalidator, ConfigFactoryInterface $config_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
-    $this->cacheTagsInvalidator = $cache_tags_invalidator;
     $this->configFactory = $config_factory;
   }
 
@@ -68,7 +58,7 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_type.manager'), $container->get('cache_tags.invalidator'), $container->get('config.factory'));
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_type.manager'), $container->get('config.factory'));
   }
 
   /**
@@ -77,7 +67,7 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
   public function build() {
     $build = [];
     $config = $this->configFactory->get('announcement.settings');
-    $cache_tags = [$config->get('cache_tags')];
+    $cache_tags = (array) $config->get('cache_tags');
 
     $announcementStorage = $this->entityTypeManager->getStorage('announcement');
     $query = $announcementStorage->getQuery();
@@ -89,7 +79,13 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
     $build['announcements'] = $this->entityTypeManager->getViewBuilder('announcement')->viewMultiple($entities);
 
     foreach ($entities as $entity) {
-      $cache_tags = array_merge($cache_tags, $entity->getCacheTags());
+      $entityCacheTags = $entity->getCacheTags();
+      foreach ($entityCacheTags as $tag) {
+        if (!is_string($tag)) {
+          throw new \Exception('Invalid cache tag: ' . var_export($tag, TRUE));
+        }
+      }
+      $cache_tags = array_merge($cache_tags, $entityCacheTags);
     }
 
     $this->addCacheableDependency($build, $cache_tags);
@@ -106,7 +102,6 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
    *   The cache tags array.
    */
   protected function addCacheableDependency(array &$build, array $cache_tags) {
-    $this->cacheTagsInvalidator->invalidateTags($cache_tags);
-    $build['#cache']['tags'] = CacheTagsInvalidatorInterface::mergeTags($build['#cache']['tags'], $cache_tags);
+    $build['#cache']['tags'] = Cache::mergeTags($build['#cache']['tags'] ?? [], $cache_tags);
   }
 }

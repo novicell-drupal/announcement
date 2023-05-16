@@ -3,12 +3,10 @@
 namespace Drupal\announcement\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Provides an 'Announcements' block.
@@ -22,18 +20,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * Announcement entity storage class.
+   * The entity storage for announcements.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $entityTypeManager;
+  protected $storage;
 
   /**
-   * Configuration factory.
+   * The view builder for announcements.
    *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   * @var \Drupal\Core\Entity\EntityViewBuilderInterface
    */
-  protected $configFactory;
+  protected $viewBuilder;
 
   /**
    * Constructs a new AnnouncementsBlock object.
@@ -43,20 +41,26 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
    * @param string $plugin_id
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
-   *   Announcement entity storage class.
+   *   The plugin definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   Announcement entity view builder class.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   Configuration factory.
+   *   The entity type manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->entityTypeManager = $entity_type_manager;
-    $this->configFactory = $config_factory;
+    $this->storage = $entity_type_manager->getStorage('announcement');
+    $this->viewBuilder = $entity_type_manager->getViewBuilder('announcement');
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_type.manager'), $container->get('config.factory'));
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager')
+    );
   }
 
   /**
@@ -69,36 +73,19 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
    *   Thrown if an invalid cache tag is detected.
    */
   public function build() {
-    $build = [];
-    $config = $this->configFactory->get('announcement.settings');
-    $cache_tags = (array) $config->get('cache_tags');
-
-    $announcementStorage = $this->entityTypeManager->getStorage('announcement');
-    $query = $announcementStorage->getQuery();
-    $query->condition('status', TRUE);
-    $ids = $query->execute();
-
-    if (empty($ids)) {
-      return $build;
-    }
-
-    $entities = $announcementStorage->loadMultiple($ids);
-    $build['announcements'] = $this->entityTypeManager->getViewBuilder('announcement')->viewMultiple($entities);
-
-    foreach ($entities as $entity) {
-      $entityCacheTags = $entity->getCacheTags();
-      foreach ($entityCacheTags as $tag) {
-        if (!is_string($tag)) {
-          throw new \Exception('Invalid cache tag: ' . var_export($tag, TRUE));
-        }
-      }
-      $cache_tags = Cache::mergeTags($cache_tags, $entityCacheTags);
-    }
-
     $cacheMetadata = new CacheableMetadata();
     $cacheMetadata->addCacheTags(['languages', 'announcement_list']);
+    $build = [];
 
-    $build['#cache']['tags'] = Cache::mergeTags($build['#cache']['tags'] ?? [], $cache_tags, $cacheMetadata->getCacheTags());
+    $ids = $this->storage->getQuery()->condition('status', TRUE)->execute();
+    $entities = $this->storage->loadMultiple($ids);
+
+    $build['announcements'] = $this->viewBuilder->viewMultiple($entities);
+    foreach ($entities as $entity) {
+      $cacheMetadata->addCacheableDependency($entity);
+    }
+
+    $cacheMetadata->applyTo($build);
 
     return $build;
   }

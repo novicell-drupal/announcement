@@ -54,24 +54,17 @@ class AnnouncementSettingsForm extends ConfigFormBase {
   }
 
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('announcement.settings');
     $form['standalone_url'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Standalone announcement URL'),
-      '#default_value' => $config->get('standalone_url'),
+      '#default_value' => $this->config('announcement.settings')->get('standalone_url'),
       '#description' => $this->t("Allow users to access @announcement-entities at /announcement/{id}.", ['@announcement-entities' => $this->entityTypeManager->getDefinition('announcement')->getPluralLabel()]),
     ];
     $form['delete_when_deactivated'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Delete when deactivated'),
-      '#default_value' => $config->get('delete_when_deactivated'),
+      '#default_value' => $this->config('announcement.settings')->get('delete_when_deactivated'),
       '#description' => $this->t("Instead of deactivating announcements at the deactivation time, delete them instead."),
-    ];
-    $form['cache_tags'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Cache tags'),
-      '#default_value' => implode("\n", $config->get('cache_tags')),
-      '#description' => $this->t('Enter one cache tag per line.'),
     ];
     return parent::buildForm($form, $form_state);
   }
@@ -80,11 +73,9 @@ class AnnouncementSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $cache_tags = array_filter(array_map('trim', explode("\n", $form_state->getValue('cache_tags'))));
     $this->config('announcement.settings')
       ->set('delete_when_deactivated', $form_state->getValue('delete_when_deactivated'))
       ->set('standalone_url', $form_state->getValue('standalone_url'))
-      ->set('cache_tags', $cache_tags)
       ->save();
 
     parent::submitForm($form, $form_state);

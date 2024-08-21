@@ -74,7 +74,10 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
     $cacheMetadata->addCacheTags(['languages', 'announcement_list']);
     $build = [];
 
-    $ids = $this->storage->getQuery()->condition('status', TRUE)->execute();
+    $ids = $this->storage->getQuery()
+      ->accessCheck()
+      ->condition('status', TRUE)
+      ->execute();
     $entities = $this->storage->loadMultiple($ids);
 
     $build['announcements'] = $this->viewBuilder->viewMultiple($entities);
@@ -86,4 +89,5 @@ class AnnouncementsBlock extends BlockBase implements ContainerFactoryPluginInte
 
     return $build;
   }
+
 }

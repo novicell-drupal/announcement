@@ -2,7 +2,7 @@ name: Announcements
 description: Can be used for breaking news or similar alerts.
 type: module
 core_version_requirement: ^8 || ^9 || ^10
-version: '1.1.1'
+version: '2.0.0'
 configure: entity.announcement.admin_form
 package: Content
 

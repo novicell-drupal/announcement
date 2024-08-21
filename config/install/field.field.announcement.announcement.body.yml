@@ -4,12 +4,9 @@ dependencies:
   config:
     - field.storage.announcement.body
   module:
-    - allowed_formats
     - announcement
     - text
-third_party_settings:
-  allowed_formats:
-    allowed_formats: {  }
+third_party_settings: {  }
 id: announcement.announcement.body
 field_name: body
 entity_type: announcement
